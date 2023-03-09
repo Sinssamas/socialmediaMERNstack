@@ -8,6 +8,7 @@ import helmet from "helmet";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+import {register} from "./controllers/auth.js";
 
 //configurations
 const __filename = fileURLToPath(import.meta.url);
@@ -16,7 +17,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(helmet());
-app.use(helmet.crossOriginEmbedderPolicy({policy:"cross-origin"}));
+app.use(helmet.crossOriginEmbedderPolicy());
 app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb" , extended : true }));
 app.use(bodyParser.urlencoded({limit:"30mb", extended:true}));
@@ -35,3 +36,19 @@ const storage = multer.diskStorage({
 });
 
 const upload= multer({ storage });
+
+
+//routes_with_files
+
+app.post("/auth/register", upload.single("picture"), register);
+
+
+//mongoose setup
+const PORT = process.env.PORT || 6001;
+mongoose.connect(process.env.MONGO_URL,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(()=>{
+    app.listen(PORT,()=>console.log(`server port : ${PORT}`));
+}).catch((error)=>console.log(`${error} did not connect`));
+
